@@ -1,7 +1,7 @@
 import Flashcard from '../models/Flashcard.js';
 import Deck from '../models/Deck.js';
 
-export const createFlashcard = async (
+export const createFlashcardService = async (
     data,
     deckId,
     userId
@@ -42,6 +42,12 @@ export const getDeckFlashcards = async (
         throw new Error('Deck not found');
     }
 
+    return await Flashcard.find({
+        deck: deckId
+    });
+};
+
+export const getFlashcardsByDeckService = async (deckId) => {
     return await Flashcard.find({
         deck: deckId
     });
