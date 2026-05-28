@@ -1,30 +1,54 @@
-import bcrypt from "bcryptjs";
-import User from "../models/User.js";
-import generateToken from "../utils/generateToken.js";
+import User from '../models/User.js';
+import bcrypt from 'bcryptjs';
+import generateToken from '../utils/generateToken.js';
 
-export const registerUser = async ({
-  username,
-  email,
-  password,
-}) => {
-  const existingUser = await User.findOne({ email });
+export const registerUser = async (data) => {
+    const { username, email, password } = data;
 
-  if (existingUser) {
-    throw new Error("User already exists");
-  }
+    const existingUser = await User.findOne({ email });
 
-  const hashedPassword = await bcrypt.hash(password, 10);
+    if (existingUser) {
+        throw new Error('User already exists');
+    }
 
-  const user = await User.create({
-    username,
-    email,
-    password: hashedPassword,
-  });
+    const hashedPassword = await bcrypt.hash(password, 10);
 
-  const token = generateToken(user._id);
+    const user = await User.create({
+        username,
+        email,
+        password: hashedPassword
+    });
 
-  return {
-    user,
-    token,
-  };
+    return {
+        id: user._id,
+        username: user.username,
+        email: user.email
+    };
+};
+
+export const loginUser = async (data) => {
+    const { email, password } = data;
+
+    const user = await User.findOne({ email });
+
+    if (!user) {
+        throw new Error('Invalid credentials');
+    }
+
+    const isMatch = await bcrypt.compare(password, user.password);
+
+    if (!isMatch) {
+        throw new Error('Invalid credentials');
+    }
+
+    const token = generateToken(user._id);
+
+    return {
+        token,
+        user: {
+            id: user._id,
+            username: user.username,
+            email: user.email
+        }
+    };
 };
