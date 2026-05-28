@@ -3,6 +3,7 @@ import cors from 'cors';
 import authRoutes from "./routes/auth.routes.js";
 import userRoutes from './routes/user.routes.js';
 import deckRoutes from './routes/deck.routes.js';
+import flashcardRoutes from './routes/flashcard.routes.js';
     
 const app =express();
 
@@ -15,6 +16,8 @@ app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 
 app.use('/api/decks', deckRoutes);
+
+app.use('/api/flashcards', flashcardRoutes);
 
 app.get('/', (req, res) => {
     res.json({ 
