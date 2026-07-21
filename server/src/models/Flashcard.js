@@ -36,6 +36,16 @@ const flashcardSchema = new mongoose.Schema(
             default: Date.now
         },
 
+        intervalDays: {
+            type: Number,
+            default: 0
+        },
+
+        easeFactor: {
+            type: Number,
+            default: 2.5
+        },
+
         reviewCount: {
             type: Number,
             default: 0

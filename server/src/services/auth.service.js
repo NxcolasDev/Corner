@@ -19,10 +19,15 @@ export const registerUser = async (data) => {
         password: hashedPassword
     });
 
+    const token = generateToken(user._id);
+
     return {
-        id: user._id,
-        username: user.username,
-        email: user.email
+        token,
+        user: {
+            id: user._id,
+            username: user.username,
+            email: user.email
+        }
     };
 };
 
