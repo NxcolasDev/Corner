@@ -1,12 +1,9 @@
 import {
-  createContext,
-  useContext,
   useEffect,
   useState
 } from "react";
 import { setAuthToken } from "../api/axios";
-
-const AuthContext = createContext(null);
+import AuthContext from "./auth-context";
 
 const getInitialAuth = () => {
   try {
@@ -54,5 +51,3 @@ export const AuthProvider = ({ children }) => {
     </AuthContext.Provider>
   );
 };
-
-export const useAuth = () => useContext(AuthContext);

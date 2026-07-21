@@ -1,19 +1,20 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../context/AuthContext";
+import { useAuth } from "../context/useAuth";
+
+const getInitialDailyGoal = () => {
+  const storedGoal = Number(localStorage.getItem("corner-daily-goal"));
+  return storedGoal > 0 ? storedGoal : 20;
+};
+
+const getInitialRemindersEnabled = () =>
+  localStorage.getItem("corner-study-reminders") !== "false";
 
 const Settings = () => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
-  const [dailyGoal, setDailyGoal] = useState(20);
-  const [remindersEnabled, setRemindersEnabled] = useState(true);
-
-  useEffect(() => {
-    const storedGoal = Number(localStorage.getItem("corner-daily-goal"));
-    const storedReminders = localStorage.getItem("corner-study-reminders");
-    setDailyGoal(storedGoal > 0 ? storedGoal : 20);
-    setRemindersEnabled(storedReminders !== "false");
-  }, []);
+  const [dailyGoal, setDailyGoal] = useState(getInitialDailyGoal);
+  const [remindersEnabled, setRemindersEnabled] = useState(getInitialRemindersEnabled);
 
   const handleSignOut = () => {
     logout();

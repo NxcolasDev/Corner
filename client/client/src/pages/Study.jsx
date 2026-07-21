@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { fetchFlashcards, updateFlashcard } from "../services/flashcard.service";
 import { fetchDecks } from "../services/deck.service";
-import StudyCard from "../components/StudyCard";
+import StudyCard from "../components/cards/StudyCard";
 import { getDueCards } from "../utils/format";
 import Button from "../components/ui/Button";
 
@@ -43,9 +43,10 @@ const Study = () => {
     }
   };
 
+  // Reload only when the routed deck changes.
   useEffect(() => {
     loadFlashcards();
-  }, [deckId]);
+  }, [deckId]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const currentCard = flashcards[currentIndex];
 

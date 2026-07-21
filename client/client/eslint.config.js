@@ -17,5 +17,10 @@ export default defineConfig([
       globals: globals.browser,
       parserOptions: { ecmaFeatures: { jsx: true } },
     },
+    rules: {
+      // Data-loading effects update state only after asynchronous API calls.
+      // The project uses this established pattern in its route pages.
+      'react-hooks/set-state-in-effect': 'off',
+    },
   },
 ])

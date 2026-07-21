@@ -1,9 +1,11 @@
 import jwt from "jsonwebtoken";
 
+const getJwtSecret = () => process.env.JWT_SECRET || "corner-dev-secret";
+
 const generateToken = (userId) => {
   return jwt.sign(
     { id: userId },
-    process.env.JWT_SECRET,
+    getJwtSecret(),
     {
       expiresIn: "7d",
     }

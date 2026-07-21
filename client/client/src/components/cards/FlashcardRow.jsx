@@ -1,10 +1,11 @@
+import Badge from "../ui/Badge";
+import Button from "../ui/Button";
+import Card from "../shared/ui/Card";
 import { difficultyClass, difficultyLabel } from "../../utils/format";
-import Button from "./ui/Button";
-import Badge from "./ui/Badge";
 
 const FlashcardRow = ({ flashcard, onDelete, onUpdate }) => {
   return (
-    <div className="rounded-[1.75rem] border border-slate-200 bg-white p-5 shadow-sm shadow-slate-200/60">
+    <Card className="p-5">
       <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
         <div className="min-w-0 space-y-4">
           <div>
@@ -19,15 +20,15 @@ const FlashcardRow = ({ flashcard, onDelete, onUpdate }) => {
 
         <div className="flex flex-wrap items-center gap-2">
           <Badge className={difficultyClass(flashcard.difficulty)}>{difficultyLabel(flashcard.difficulty)}</Badge>
-          <Button variant="secondary" className="px-3 py-2" onClick={() => onUpdate(flashcard)}>
+          <Button variant="secondary" size="sm" className="px-3 py-2" onClick={() => onUpdate(flashcard)}>
             Edit
           </Button>
-          <Button variant="destructive" className="px-3 py-2" onClick={() => onDelete(flashcard)}>
+          <Button variant="destructive" size="sm" className="px-3 py-2" onClick={() => onDelete(flashcard)}>
             Delete
           </Button>
         </div>
       </div>
-    </div>
+    </Card>
   );
 };
 

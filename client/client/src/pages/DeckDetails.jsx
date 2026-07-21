@@ -1,14 +1,14 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
-import { fetchDecks, updateDeck, deleteDeck } from "../services/deck.service";
+import FlashcardRow from "../components/cards/FlashcardRow";
+import DeckFormModal from "../components/forms/DeckFormModal";
+import { deleteDeck, fetchDecks, updateDeck } from "../services/deck.service";
 import {
   createFlashcard,
   deleteFlashcard,
   fetchFlashcards,
   updateFlashcard,
 } from "../services/flashcard.service";
-import FlashcardRow from "../components/cards/FlashcardRow";
-import { formatDate, getDueCards } from "../utils/format";
 
 const DeckDetails = () => {
   const { deckId } = useParams();
@@ -19,10 +19,9 @@ const DeckDetails = () => {
   const [editingDeck, setEditingDeck] = useState(false);
   const [editingFlashcard, setEditingFlashcard] = useState(null);
   const [deckForm, setDeckForm] = useState({ title: "", description: "" });
+  const [isDeckModalOpen, setIsDeckModalOpen] = useState(false);
   const [cardForm, setCardForm] = useState({ front: "", back: "", tags: "", difficulty: "medium" });
   const [error, setError] = useState(null);
-
-  const dueFlashcards = getDueCards(flashcards);
 
   const loadDeck = async () => {
     try {
@@ -45,9 +44,10 @@ const DeckDetails = () => {
     }
   };
 
+  // Reload only when the routed deck changes.
   useEffect(() => {
     loadDeck();
-  }, [deckId]);
+  }, [deckId]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleSaveDeck = async (e) => {
     e.preventDefault();
@@ -55,6 +55,7 @@ const DeckDetails = () => {
       const updated = await updateDeck(deckId, deckForm);
       setDeck(updated);
       setEditingDeck(false);
+      setIsDeckModalOpen(false);
     } catch {
       setError("Unable to save deck.");
     }
@@ -68,6 +69,22 @@ const DeckDetails = () => {
     } catch {
       setError("Unable to delete deck.");
     }
+  };
+
+  const handleOpenDeckModal = () => {
+    setDeckForm({ title: deck?.title || "", description: deck?.description || "" });
+    setEditingDeck(true);
+    setIsDeckModalOpen(true);
+  };
+
+  const handleCloseDeckModal = () => {
+    setEditingDeck(false);
+    setIsDeckModalOpen(false);
+    setDeckForm({ title: "", description: "" });
+  };
+
+  const handleDeckFieldChange = (field, value) => {
+    setDeckForm((prev) => ({ ...prev, [field]: value }));
   };
 
   const handleCreateOrUpdateCard = async (e) => {
@@ -121,6 +138,15 @@ const DeckDetails = () => {
 
   return (
     <div className="space-y-6">
+      <DeckFormModal
+        isOpen={isDeckModalOpen}
+        editingDeck={editingDeck}
+        form={deckForm}
+        onClose={handleCloseDeckModal}
+        onSubmit={handleSaveDeck}
+        onFieldChange={handleDeckFieldChange}
+      />
+
       <section className="rounded-[2rem] border border-slate-200 bg-white p-6 md:p-8">
         <Link to="/dashboard" className="text-sm font-semibold uppercase tracking-[0.24em] text-blue-600 hover:text-blue-700">
           ← Back to decks
@@ -134,7 +160,7 @@ const DeckDetails = () => {
             <Link to={`/study/${deckId}`} className="rounded-2xl bg-blue-600 px-5 py-3 font-bold text-white hover:bg-blue-700">
               Start study session
             </Link>
-            <button onClick={() => setEditingDeck(true)} className="rounded-2xl border px-5 py-3 font-semibold text-slate-700">
+            <button onClick={handleOpenDeckModal} className="rounded-2xl border px-5 py-3 font-semibold text-slate-700">
               Edit
             </button>
             <button onClick={handleDeleteDeck} className="rounded-2xl border border-rose-200 bg-rose-50 px-5 py-3 font-semibold text-rose-700">
