@@ -6,16 +6,7 @@ import DeckCard from "../components/cards/DeckCard";
 import DeckFormModal from "../components/forms/DeckFormModal";
 import { useAuth } from "../context/useAuth";
 import { getDueCards } from "../utils/format";
-import {
-  CornerHeroSection,
-  CornerMetric,
-  CornerCard,
-  CornerButton,
-  CornerInput,
-  CornerSectionTitle,
-  CornerSurface,
-  CornerBadge,
-} from "../components/corner";
+
 import ProgressChart from "../components/charts/ProgressChart";
 import CategoryChart from "../components/charts/CategoryChart";
 import ActivityChart from "../components/charts/ActivityChart";
@@ -75,7 +66,6 @@ const Dashboard = () => {
     }
   };
 
-  // `loadDecks` is intentionally recreated with the page state; the load runs on mount only.
   useEffect(() => {
     loadDecks();
     setStreak(getDailyStreak());
@@ -241,43 +231,101 @@ const Dashboard = () => {
         onFieldChange={handleFieldChange}
       />
 
-      <CornerHeroSection user={user} streak={streak} dueToday={cardsDueToday} onStart={() => handleOpenModal()} />
-
-      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-        <CornerMetric label="Total decks" value={decks.length} detail="Organized learning sets." icon={<BookOpen size={24} />} />
-        <CornerMetric label="Flashcards" value={totalCards} detail="Cards available for review." icon={<Layers size={24} />} />
-        <CornerMetric label="Due today" value={cardsDueToday} detail="Ready for your next study session." icon={<Clock3 size={24} />} variant="accent" />
-        <CornerMetric label="Study streak" value={`${streak} days`} detail="Keep your momentum alive." icon={<Flame size={22} />} />
+      {/* Hero Section */}
+      <div className="flex flex-col gap-4 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-slate-900">
+            Welcome back, {user?.name || "Student"}! 👋
+          </h1>
+          <p className="mt-1 text-sm text-slate-500">
+            You have <span className="font-semibold text-indigo-600">{cardsDueToday} cards</span> due for review today.
+          </p>
+        </div>
+        <button
+          onClick={() => handleOpenModal()}
+          className="inline-flex items-center justify-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-700"
+        >
+          <Plus size={18} />
+          Create new deck
+        </button>
       </div>
 
+      {/* Metrics Grid */}
+      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+        <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+          <div className="flex items-center justify-between">
+            <span className="text-sm font-medium text-slate-500">Total decks</span>
+            <div className="rounded-xl bg-indigo-50 p-2 text-indigo-600"><BookOpen size={20} /></div>
+          </div>
+          <p className="mt-3 text-2xl font-bold text-slate-900">{decks.length}</p>
+          <p className="mt-1 text-xs text-slate-500">Organized learning sets.</p>
+        </div>
+
+        <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+          <div className="flex items-center justify-between">
+            <span className="text-sm font-medium text-slate-500">Flashcards</span>
+            <div className="rounded-xl bg-indigo-50 p-2 text-indigo-600"><Layers size={20} /></div>
+          </div>
+          <p className="mt-3 text-2xl font-bold text-slate-900">{totalCards}</p>
+          <p className="mt-1 text-xs text-slate-500">Cards available for review.</p>
+        </div>
+
+        <div className="rounded-2xl border border-indigo-100 bg-indigo-50/50 p-5 shadow-sm">
+          <div className="flex items-center justify-between">
+            <span className="text-sm font-medium text-indigo-900">Due today</span>
+            <div className="rounded-xl bg-indigo-100 p-2 text-indigo-600"><Clock3 size={20} /></div>
+          </div>
+          <p className="mt-3 text-2xl font-bold text-indigo-950">{cardsDueToday}</p>
+          <p className="mt-1 text-xs text-indigo-600">Ready for your next study session.</p>
+        </div>
+
+        <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+          <div className="flex items-center justify-between">
+            <span className="text-sm font-medium text-slate-500">Study streak</span>
+            <div className="rounded-xl bg-amber-50 p-2 text-amber-600"><Flame size={20} /></div>
+          </div>
+          <p className="mt-3 text-2xl font-bold text-slate-900">{streak} days</p>
+          <p className="mt-1 text-xs text-slate-500">Keep your momentum alive.</p>
+        </div>
+      </div>
+
+      {/* Charts Grid */}
       <div className="grid gap-4 xl:grid-cols-2">
         <ProgressChart data={progressData} />
         <ActivityChart data={activityData} />
       </div>
 
+      {/* Decks + Summary Section */}
       <div className="grid gap-4 xl:grid-cols-[1.5fr_.85fr]">
-        <CornerSurface className="space-y-5 border border-slate-200/80">
+        <div className="space-y-5 rounded-2xl border border-slate-200/80 bg-white p-6 shadow-sm">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <CornerSectionTitle title="My Decks" subtitle="Library" />
+            <div>
+              <h2 className="text-lg font-bold text-slate-900">My Decks</h2>
+              <p className="text-xs text-slate-500">Library</p>
+            </div>
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
               <div className="flex items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 px-3 py-1.5">
                 <Search size={15} className="text-slate-400" />
-                <CornerInput
+                <input
+                  type="text"
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                   placeholder="Search decks"
-                  className="h-7 w-full border-0 bg-transparent px-0 py-0 text-sm text-slate-900 placeholder:text-slate-400 focus:ring-0"
+                  className="h-7 w-full border-0 bg-transparent px-0 py-0 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-0"
                 />
               </div>
-              <CornerButton onClick={() => handleOpenModal()} className="flex items-center gap-2 rounded-lg px-3 py-2 text-xs">
+              <button
+                onClick={() => handleOpenModal()}
+                className="flex items-center justify-center gap-2 rounded-lg bg-indigo-600 px-3 py-2 text-xs font-semibold text-white transition hover:bg-indigo-700"
+              >
                 <Plus size={15} />
                 New deck
-              </CornerButton>
+              </button>
             </div>
           </div>
 
           {error && (
-            <div className="rounded-[2rem] bg-rose-50 p-4 text-sm font-medium text-rose-700">
+            <div className="rounded-2xl bg-rose-50 p-4 text-sm font-medium text-rose-700">
               {error}
             </div>
           )}
@@ -299,22 +347,26 @@ const Dashboard = () => {
               <div className="col-span-full rounded-xl border border-dashed border-slate-300 bg-slate-50 p-8 text-center">
                 <BookOpen size={32} className="mx-auto text-slate-300" />
                 <h3 className="mt-3 text-base font-bold text-slate-900">No decks found</h3>
-                <CornerButton onClick={() => handleOpenModal()} className="mt-4 rounded-lg px-3 py-2 text-xs">
+                <button
+                  onClick={() => handleOpenModal()}
+                  className="mt-4 rounded-lg bg-indigo-600 px-3 py-2 text-xs font-semibold text-white transition hover:bg-indigo-700"
+                >
                   Create deck
-                </CornerButton>
+                </button>
               </div>
             )}
           </div>
-        </CornerSurface>
+        </div>
 
+        {/* Right Sidebar Details */}
         <div className="space-y-4">
-          <CornerCard className="border-slate-200/80 p-5 shadow-sm">
+          <div className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm">
             <div className="flex items-center justify-between gap-4">
               <div>
                 <p className="text-[0.6rem] font-semibold uppercase tracking-[0.2em] text-slate-400">Today’s focus</p>
                 <h3 className="mt-1 text-lg font-bold text-slate-950">Review plan</h3>
               </div>
-              <CornerBadge tone="info">Ready</CornerBadge>
+              <span className="rounded-full bg-blue-50 px-2.5 py-1 text-xs font-semibold text-blue-700">Ready</span>
             </div>
             <div className="mt-4 grid gap-3 sm:grid-cols-2">
               <div className="rounded-xl bg-slate-50 p-4">
@@ -328,17 +380,19 @@ const Dashboard = () => {
                 <p className="mt-1 text-xs text-slate-500">keep the momentum alive</p>
               </div>
             </div>
-          </CornerCard>
+          </div>
 
           <CategoryChart data={categoryData} />
 
-          <CornerCard className="border-slate-200/80 p-5 shadow-sm">
+          <div className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm">
             <div className="flex items-center justify-between gap-4">
               <div>
                 <p className="text-[0.6rem] font-semibold uppercase tracking-[0.2em] text-slate-400">Recent decks</p>
                 <h3 className="mt-1 text-lg font-bold text-slate-950">Activity overview</h3>
               </div>
-              <CornerBadge tone="success">{recentDecks.length} live</CornerBadge>
+              <span className="rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-700">
+                {recentDecks.length} live
+              </span>
             </div>
             <div className="mt-4 space-y-2">
               {recentDecks.length ? (
@@ -359,7 +413,7 @@ const Dashboard = () => {
                 <p className="text-sm text-slate-500">No recent decks yet.</p>
               )}
             </div>
-          </CornerCard>
+          </div>
         </div>
       </div>
     </div>

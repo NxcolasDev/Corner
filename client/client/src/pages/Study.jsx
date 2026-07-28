@@ -4,7 +4,9 @@ import { fetchFlashcards, updateFlashcard } from "../services/flashcard.service"
 import { fetchDecks } from "../services/deck.service";
 import StudyCard from "../components/cards/StudyCard";
 import { getDueCards } from "../utils/format";
-import Button from "../components/ui/Button";
+
+// Importação corrigida para apontar para src/components/corner
+import CornerButton from "../components/corner/CornerButton";
 
 const Study = () => {
   const { deckId } = useParams();
@@ -180,22 +182,22 @@ const Study = () => {
         <div className="rounded-[2rem] border border-slate-200 bg-slate-50 p-6 shadow-sm shadow-slate-200/70">
           <p className="text-sm font-bold uppercase tracking-[0.18em] text-slate-500">How did it feel?</p>
           <div className="mt-5 grid gap-3 sm:grid-cols-2">
-            <Button aria-label="Again - 5 minutes" onClick={() => handleReview("again")} variant="rating" color="again" className="w-full text-left">
+            <CornerButton aria-label="Again - 5 minutes" onClick={() => handleReview("again")} variant="rating" color="again" className="w-full text-left">
               Again
               <span className="block text-xs font-medium text-slate-500">5 minutes</span>
-            </Button>
-            <Button aria-label="Hard - short interval" onClick={() => handleReview("hard")} variant="rating" color="hard" className="w-full text-left">
+            </CornerButton>
+            <CornerButton aria-label="Hard - short interval" onClick={() => handleReview("hard")} variant="rating" color="hard" className="w-full text-left">
               Hard
               <span className="block text-xs font-medium text-slate-500">Short interval</span>
-            </Button>
-            <Button aria-label="Good - normal interval" onClick={() => handleReview("medium")} variant="rating" color="medium" className="w-full text-left">
+            </CornerButton>
+            <CornerButton aria-label="Good - normal interval" onClick={() => handleReview("medium")} variant="rating" color="medium" className="w-full text-left">
               Good
               <span className="block text-xs font-medium text-slate-500">Normal interval</span>
-            </Button>
-            <Button aria-label="Easy - long interval" onClick={() => handleReview("easy")} variant="rating" color="easy" className="w-full text-left">
+            </CornerButton>
+            <CornerButton aria-label="Easy - long interval" onClick={() => handleReview("easy")} variant="rating" color="easy" className="w-full text-left">
               Easy
               <span className="block text-xs font-medium text-slate-500">Long interval</span>
-            </Button>
+            </CornerButton>
           </div>
 
           <div className="mt-6 rounded-[1.75rem] bg-white p-4 text-sm leading-6 text-slate-600 shadow-sm shadow-slate-200">

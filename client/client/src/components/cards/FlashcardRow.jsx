@@ -1,11 +1,13 @@
-import Badge from "../ui/Badge";
-import Button from "../ui/Button";
-import Card from "../shared/ui/Card";
+import {
+  CornerCard,
+  CornerBadge,
+  CornerButton,
+} from "../corner";
 import { difficultyClass, difficultyLabel } from "../../utils/format";
 
 const FlashcardRow = ({ flashcard, onDelete, onUpdate }) => {
   return (
-    <Card className="p-5">
+    <CornerCard className="p-5">
       <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
         <div className="min-w-0 space-y-4">
           <div>
@@ -19,16 +21,16 @@ const FlashcardRow = ({ flashcard, onDelete, onUpdate }) => {
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
-          <Badge className={difficultyClass(flashcard.difficulty)}>{difficultyLabel(flashcard.difficulty)}</Badge>
-          <Button variant="secondary" size="sm" className="px-3 py-2" onClick={() => onUpdate(flashcard)}>
+          <CornerBadge className={difficultyClass(flashcard.difficulty)}>{difficultyLabel(flashcard.difficulty)}</CornerBadge>
+          <CornerButton variant="secondary" size="sm" className="px-3 py-2" onClick={() => onUpdate(flashcard)}>
             Edit
-          </Button>
-          <Button variant="destructive" size="sm" className="px-3 py-2" onClick={() => onDelete(flashcard)}>
+          </CornerButton>
+          <CornerButton variant="destructive" size="sm" className="px-3 py-2" onClick={() => onDelete(flashcard)}>
             Delete
-          </Button>
+          </CornerButton>
         </div>
       </div>
-    </Card>
+    </CornerCard>
   );
 };
 

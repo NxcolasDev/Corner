@@ -1,4 +1,4 @@
-import Button from "../ui/Button";
+import { CornerButton } from "../corner";
 
 const DeckFormModal = ({
   isOpen,
@@ -57,9 +57,9 @@ const DeckFormModal = ({
             />
           </div>
 
-          <Button type="submit" className="w-full py-3">
+          <CornerButton type="submit" className="w-full py-3">
             {editingDeck ? "Save Changes" : "Create Deck"}
-          </Button>
+          </CornerButton>
         </form>
       </div>
     </div>
