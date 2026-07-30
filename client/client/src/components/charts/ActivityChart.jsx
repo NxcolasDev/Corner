@@ -1,9 +1,8 @@
-import { CornerCard } from "../corner";
 import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip, CartesianGrid } from "recharts";
 
 const ActivityChart = ({ data = [] }) => {
   return (
-    <CornerCard className="h-72 p-5">
+    <div className="h-72 rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm">
       <div className="mb-3">
         <p className="text-[0.6rem] font-semibold uppercase tracking-[0.2em] text-slate-400">Recent activity</p>
         <h3 className="mt-1 text-lg font-bold text-slate-950">Flashcard reviews</h3>
@@ -24,7 +23,7 @@ const ActivityChart = ({ data = [] }) => {
           <Area type="monotone" dataKey="reviews" stroke="#0ea5e9" strokeWidth={3} fill="url(#activityGradient)" />
         </AreaChart>
       </ResponsiveContainer>
-    </CornerCard>
+    </div>
   );
 };
 

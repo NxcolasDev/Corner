@@ -1,4 +1,6 @@
-import { CornerButton } from "../corner";
+import { X, Tag, Image } from "lucide-react";
+
+const categoriesList = ["Idiomas", "Programação", "Exames", "Outros"];
 
 const DeckFormModal = ({
   isOpen,
@@ -8,58 +10,105 @@ const DeckFormModal = ({
   onSubmit,
   onFieldChange,
 }) => {
-  if (!isOpen) {
-    return null;
-  }
+  if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/50 p-4">
-      <div className="w-full max-w-lg rounded-[2rem] bg-white p-8 shadow-xl">
-        <div className="mb-6 flex items-center justify-between">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4">
+      <div className="w-full max-w-md rounded-3xl border border-slate-100 bg-white p-6 shadow-2xl transition-all">
+        {/* Header */}
+        <div className="flex items-center justify-between pb-4 border-b border-slate-100">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.25em] text-blue-600">
-              Corner
-            </p>
-            <h2 className="mt-2 text-2xl font-bold text-slate-900">
-              {editingDeck ? "Edit Deck" : "Create Deck"}
+            <h2 className="text-lg font-bold text-slate-900">
+              {editingDeck ? "Editar Deck" : "Criar Novo Deck"}
             </h2>
+            <p className="text-xs text-slate-500 font-medium mt-0.5">
+              {editingDeck ? "Atualize as informações do baralho" : "Adicione uma nova coleção de flashcards"}
+            </p>
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="text-2xl text-slate-400 hover:text-slate-700"
+            className="rounded-xl p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition"
           >
-            ×
+            <X size={18} />
           </button>
         </div>
 
-        <form onSubmit={onSubmit} className="space-y-5">
+        {/* Form */}
+        <form onSubmit={onSubmit} className="mt-5 space-y-4">
           <div>
-            <label className="text-sm font-semibold text-slate-700">Title</label>
+            <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5">
+              Título
+            </label>
             <input
               type="text"
-              name="title"
-              value={form.title}
-              onChange={(event) => onFieldChange(event.target.name, event.target.value)}
               required
-              className="mt-2 w-full rounded-2xl border border-slate-200 px-4 py-3 outline-none focus:border-blue-600"
+              value={form.title || ""}
+              onChange={(e) => onFieldChange("title", e.target.value)}
+              placeholder="ex: Vocabulário em Francês"
+              className="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-3.5 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:border-blue-600 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-600/10 transition"
             />
           </div>
 
           <div>
-            <label className="text-sm font-semibold text-slate-700">Description</label>
-            <textarea
-              rows={4}
-              name="description"
-              value={form.description}
-              onChange={(event) => onFieldChange(event.target.name, event.target.value)}
-              className="mt-2 w-full resize-none rounded-2xl border border-slate-200 px-4 py-3 outline-none focus:border-blue-600"
+            <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5 flex items-center gap-1">
+              <Tag size={12} /> Categoria
+            </label>
+            <select
+              value={form.category || "Outros"}
+              onChange={(e) => onFieldChange("category", e.target.value)}
+              className="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-3.5 py-2.5 text-sm text-slate-900 focus:border-blue-600 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-600/10 transition"
+            >
+              {categoriesList.map((cat) => (
+                <option key={cat} value={cat}>
+                  {cat}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5 flex items-center gap-1">
+              <Image size={12} /> URL da Imagem / Capa <span className="text-slate-400 font-normal">(opcional)</span>
+            </label>
+            <input
+              type="url"
+              value={form.imageUrl || ""}
+              onChange={(e) => onFieldChange("imageUrl", e.target.value)}
+              placeholder="https://exemplo.com/bandeira-franca.png"
+              className="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-3.5 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:border-blue-600 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-600/10 transition"
             />
           </div>
 
-          <CornerButton type="submit" className="w-full py-3">
-            {editingDeck ? "Save Changes" : "Create Deck"}
-          </CornerButton>
+          <div>
+            <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5">
+              Descrição <span className="text-slate-400 font-normal">(opcional)</span>
+            </label>
+            <textarea
+              rows={2}
+              value={form.description || ""}
+              onChange={(e) => onFieldChange("description", e.target.value)}
+              placeholder="Resumo sobre o conteúdo deste deck..."
+              className="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-3.5 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:border-blue-600 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-600/10 transition resize-none"
+            />
+          </div>
+
+          {/* Actions */}
+          <div className="flex items-center justify-end gap-3 pt-3 border-t border-slate-50">
+            <button
+              type="button"
+              onClick={onClose}
+              className="rounded-xl px-4 py-2.5 text-xs font-bold text-slate-600 hover:bg-slate-100 transition"
+            >
+              Cancelar
+            </button>
+            <button
+              type="submit"
+              className="rounded-xl bg-blue-600 px-5 py-2.5 text-xs font-bold text-white shadow-md shadow-blue-600/20 hover:bg-blue-700 transition active:scale-95"
+            >
+              {editingDeck ? "Salvar Alterações" : "Criar Deck"}
+            </button>
+          </div>
         </form>
       </div>
     </div>

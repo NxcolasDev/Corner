@@ -1,11 +1,10 @@
-import { CornerCard } from "../corner";
 import { ResponsiveContainer, AreaChart, Area, CartesianGrid, Tooltip, XAxis, YAxis } from "recharts";
 
 const ProgressChart = ({ data = [] }) => {
   const totalProgress = data.reduce((sum, item) => sum + item.value, 0);
 
   return (
-    <CornerCard className="h-72 p-5">
+    <div className="h-72 rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm">
       <div className="mb-4 flex items-center justify-between gap-4">
         <div>
           <p className="text-[0.6rem] font-semibold uppercase tracking-[0.2em] text-slate-400">Study progress</p>
@@ -18,7 +17,12 @@ const ProgressChart = ({ data = [] }) => {
 
       <ResponsiveContainer width="100%" height="78%">
         <AreaChart data={data} margin={{ top: 10, right: 8, left: -18, bottom: 0 }}>
-          <defs><linearGradient id="progressGradient" x1="0" y1="0" x2="0" y2="1"><stop offset="5%" stopColor="#2563eb" stopOpacity={.25} /><stop offset="95%" stopColor="#2563eb" stopOpacity={0} /></linearGradient></defs>
+          <defs>
+            <linearGradient id="progressGradient" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="5%" stopColor="#2563eb" stopOpacity={0.25} />
+              <stop offset="95%" stopColor="#2563eb" stopOpacity={0} />
+            </linearGradient>
+          </defs>
           <CartesianGrid vertical={false} stroke="#e9eef7" />
           <XAxis dataKey="name" tickLine={false} axisLine={false} tick={{ fill: "#94a3b8", fontSize: 11 }} />
           <YAxis tickLine={false} axisLine={false} tick={{ fill: "#94a3b8", fontSize: 11 }} />
@@ -26,7 +30,7 @@ const ProgressChart = ({ data = [] }) => {
           <Area type="monotone" dataKey="value" stroke="#2563eb" strokeWidth={2.5} fill="url(#progressGradient)" />
         </AreaChart>
       </ResponsiveContainer>
-    </CornerCard>
+    </div>
   );
 };
 

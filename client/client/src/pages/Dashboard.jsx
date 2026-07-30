@@ -1,420 +1,232 @@
-import { useEffect, useMemo, useState } from "react";
-import { BookOpen, Clock3, Flame, Layers, Plus, Search } from "lucide-react";
-import { createDeck, deleteDeck, fetchDecks, updateDeck } from "../services/deck.service";
-import { fetchFlashcards } from "../services/flashcard.service";
-import DeckCard from "../components/cards/DeckCard";
-import DeckFormModal from "../components/forms/DeckFormModal";
-import { useAuth } from "../context/useAuth";
-import { getDueCards } from "../utils/format";
-
-import ProgressChart from "../components/charts/ProgressChart";
-import CategoryChart from "../components/charts/CategoryChart";
-import ActivityChart from "../components/charts/ActivityChart";
-
-const getDailyStreak = () => {
-  const today = new Date().toISOString().slice(0, 10);
-  const saved = JSON.parse(localStorage.getItem("corner-streak") || "null");
-
-  if (!saved) {
-    const next = { days: 1, lastVisit: today };
-    localStorage.setItem("corner-streak", JSON.stringify(next));
-    return 1;
-  }
-
-  if (saved.lastVisit === today) return saved.days;
-
-  const yesterday = new Date(Date.now() - 86400000).toISOString().slice(0, 10);
-  const days = saved.lastVisit === yesterday ? saved.days + 1 : 1;
-  localStorage.setItem("corner-streak", JSON.stringify({ days, lastVisit: today }));
-  return days;
-};
+import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
+import { fetchDashboardStats } from "../services/user.service";
+import { 
+  Flame, 
+  BookOpen, 
+  Layers, 
+  CheckCircle2, 
+  ArrowRight, 
+  Play, 
+  Plus, 
+  Sparkles,
+  TrendingUp
+} from "lucide-react";
 
 const Dashboard = () => {
-  const { user } = useAuth();
+  const [stats, setStats] = useState(null);
   const [decks, setDecks] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [search, setSearch] = useState("");
-  const [form, setForm] = useState({ title: "", description: "" });
-  const [editingDeck, setEditingDeck] = useState(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [streak, setStreak] = useState(1);
   const [error, setError] = useState(null);
-  const [deckFlashcards, setDeckFlashcards] = useState({});
-
-  const getErrorMessage = (err, fallback) =>
-    err?.response?.data?.message || err?.message || fallback;
-
-  const loadDecks = async () => {
-    try {
-      setLoading(true);
-      const decksData = await fetchDecks();
-      setDecks(decksData);
-      setError(null);
-
-      const deckCards = await Promise.all(
-        decksData.map(async (deck) => {
-          const cards = await fetchFlashcards(deck._id);
-          return [deck._id, cards];
-        })
-      );
-
-      setDeckFlashcards(Object.fromEntries(deckCards));
-    } catch (err) {
-      setError(getErrorMessage(err, "Unable to load decks. Please refresh."));
-    } finally {
-      setLoading(false);
-    }
-  };
 
   useEffect(() => {
-    loadDecks();
-    setStreak(getDailyStreak());
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
-
-  const totalCards = useMemo(
-    () => decks.reduce((sum, item) => sum + (item.totalCards || 0), 0),
-    [decks]
-  );
-
-  const dueByDeck = useMemo(
-    () =>
-      Object.fromEntries(
-        Object.entries(deckFlashcards).map(([deckId, cards]) => [deckId, getDueCards(cards).length])
-      ),
-    [deckFlashcards]
-  );
-
-  const cardsDueToday = useMemo(
-    () => Object.values(dueByDeck).reduce((sum, count) => sum + count, 0),
-    [dueByDeck]
-  );
-
-  const recentDecks = useMemo(
-    () =>
-      [...decks]
-        .sort((a, b) => {
-          const aDate = new Date(a.lastStudied || a.updatedAt || a.createdAt).getTime();
-          const bDate = new Date(b.lastStudied || b.updatedAt || b.createdAt).getTime();
-          return bDate - aDate;
-        })
-        .slice(0, 3),
-    [decks]
-  );
-
-  const filteredDecks = useMemo(
-    () => decks.filter((deck) => deck.title.toLowerCase().includes(search.toLowerCase())),
-    [decks, search]
-  );
-
-  const progressData = useMemo(() => {
-    if (!decks.length) {
-      return [
-        { name: "Deck 1", value: 25 },
-        { name: "Deck 2", value: 55 },
-        { name: "Deck 3", value: 40 },
-      ];
-    }
-
-    return decks.slice(0, 4).map((deck) => {
-      const cards = deckFlashcards[deck._id] || [];
-      const due = getDueCards(cards).length;
-      const ratio = deck.totalCards ? Math.round((due / deck.totalCards) * 100) : 0;
-      return {
-        name: deck.title.length > 10 ? `${deck.title.slice(0, 10)}...` : deck.title,
-        value: Math.min(100, Math.max(10, ratio)),
-      };
-    });
-  }, [decks, deckFlashcards]);
-
-  const categoryData = useMemo(() => {
-    const counts = { easy: 0, medium: 0, hard: 0 };
-
-    Object.values(deckFlashcards).flat().forEach((card) => {
-      if (counts[card.difficulty] !== undefined) {
-        counts[card.difficulty] += 1;
+    const loadStats = async () => {
+      try {
+        setLoading(true);
+        const data = await fetchDashboardStats();
+        setStats(data.stats);
+        setDecks(data.decks || []);
+      } catch {
+        setError("Não foi possível carregar as estatísticas.");
+      } finally {
+        setLoading(false);
       }
-    });
+    };
 
-    return [
-      { name: "Easy", value: counts.easy },
-      { name: "Medium", value: counts.medium },
-      { name: "Hard", value: counts.hard },
-    ].filter((item) => item.value > 0);
-  }, [deckFlashcards]);
+    loadStats();
+  }, []);
 
-  const activityData = useMemo(() => {
-    const today = new Date();
-    const days = Array.from({ length: 7 }, (_, index) => {
-      const date = new Date(today);
-      date.setDate(today.getDate() + index);
-      return {
-        name: date.toLocaleDateString(undefined, { weekday: 'short' }),
-        reviews: 0,
-      };
-    });
+  if (loading) {
+    return (
+      <div className="flex h-96 items-center justify-center">
+        <div className="flex flex-col items-center gap-3">
+          <div className="h-10 w-10 animate-spin rounded-full border-4 border-blue-600 border-t-transparent" />
+          <p className="text-sm font-semibold text-slate-400">Carregando painel...</p>
+        </div>
+      </div>
+    );
+  }
 
-    Object.values(deckFlashcards)
-      .flat()
-      .forEach((card) => {
-        const nextReview = card.nextReview ? new Date(card.nextReview) : null;
-        if (!nextReview) return;
+  if (error) {
+    return (
+      <div className="rounded-3xl border border-rose-200 bg-rose-50/50 p-6 text-center text-rose-700 font-semibold max-w-xl mx-auto my-8 shadow-sm">
+        {error}
+      </div>
+    );
+  }
 
-        const diffDays = Math.floor(
-          (nextReview.getTime() - today.getTime()) / (1000 * 60 * 60 * 24)
-        );
-
-        if (diffDays >= 0 && diffDays < 7) {
-          days[diffDays].reviews += 1;
-        }
-      });
-
-    return days;
-  }, [deckFlashcards]);
-
-  const handleOpenModal = (deck = null) => {
-    if (deck) {
-      setEditingDeck(deck);
-      setForm({ title: deck.title, description: deck.description || "" });
-    } else {
-      setEditingDeck(null);
-      setForm({ title: "", description: "" });
-    }
-    setIsModalOpen(true);
-  };
-
-  const handleCloseModal = () => {
-    setIsModalOpen(false);
-    setEditingDeck(null);
-    setForm({ title: "", description: "" });
-  };
-
-  const handleFieldChange = (field, value) => {
-    setForm((prev) => ({ ...prev, [field]: value }));
-  };
-
-  const handleSubmit = async (event) => {
-    event.preventDefault();
-    if (!form.title.trim()) return;
-
-    try {
-      setError(null);
-      if (editingDeck) {
-        await updateDeck(editingDeck._id, form);
-      } else {
-        await createDeck(form);
-      }
-      handleCloseModal();
-      await loadDecks();
-    } catch (err) {
-      setError(getErrorMessage(err, "Unable to save deck. Please try again."));
-    }
-  };
-
-  const handleDelete = async (deck) => {
-    if (!window.confirm(`Delete ${deck.title}?`)) return;
-    try {
-      await deleteDeck(deck._id);
-      await loadDecks();
-    } catch {
-      setError("Unable to delete deck. Please try again.");
-    }
-  };
+  const goalPercentage = stats?.dailyGoal
+    ? Math.min((stats.reviewedToday / stats.dailyGoal) * 100, 100)
+    : 0;
 
   return (
-    <div className="space-y-5">
-      <DeckFormModal
-        isOpen={isModalOpen}
-        editingDeck={editingDeck}
-        form={form}
-        onClose={handleCloseModal}
-        onSubmit={handleSubmit}
-        onFieldChange={handleFieldChange}
-      />
-
-      {/* Hero Section */}
-      <div className="flex flex-col gap-4 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-slate-900">
-            Welcome back, {user?.name || "Student"}! 👋
-          </h1>
-          <p className="mt-1 text-sm text-slate-500">
-            You have <span className="font-semibold text-indigo-600">{cardsDueToday} cards</span> due for review today.
+    <div className="space-y-10 max-w-7xl mx-auto p-6 md:p-10">
+      {/* Cabeçalho de Boas-vindas com Destaque Dinâmico */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 p-8 rounded-3xl text-white shadow-xl relative overflow-hidden">
+        <div className="absolute top-0 right-0 -mt-8 -mr-8 w-64 h-64 bg-blue-500/10 rounded-full blur-3xl pointer-events-none" />
+        <div className="relative z-10">
+          <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-md px-3 py-1 rounded-full text-xs font-semibold text-blue-300 mb-3">
+            <Sparkles size={14} /> Painel de Desempenho
+          </div>
+          <h1 className="text-3xl md:text-4xl font-black tracking-tight">Visão Geral do Seu Progresso</h1>
+          <p className="text-sm text-slate-300 mt-2 font-medium max-w-lg">
+            Mantenha sua rotina de estudos atualizada e alcance a fluência com repetição espaçada.
           </p>
         </div>
-        <button
-          onClick={() => handleOpenModal()}
-          className="inline-flex items-center justify-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-700"
+        <Link
+          to="/decks"
+          className="relative z-10 inline-flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-500 text-white font-bold text-sm px-5 py-3 rounded-2xl shadow-lg shadow-blue-600/30 hover:scale-[1.02] active:scale-95 transition-all"
         >
-          <Plus size={18} />
-          Create new deck
-        </button>
+          <Plus size={18} /> Novo Baralho
+        </Link>
       </div>
 
-      {/* Metrics Grid */}
-      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-        <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-          <div className="flex items-center justify-between">
-            <span className="text-sm font-medium text-slate-500">Total decks</span>
-            <div className="rounded-xl bg-indigo-50 p-2 text-indigo-600"><BookOpen size={20} /></div>
+      {/* Grid de Métricas Interativas */}
+      <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+        {/* Streak */}
+        <div className="group rounded-3xl border border-slate-200/80 bg-white p-6 shadow-xs hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex items-center gap-4">
+          <div className="grid h-14 w-14 place-items-center rounded-2xl bg-amber-50 text-amber-500 group-hover:bg-amber-500 group-hover:text-white transition-colors duration-300 shrink-0">
+            <Flame size={26} />
           </div>
-          <p className="mt-3 text-2xl font-bold text-slate-900">{decks.length}</p>
-          <p className="mt-1 text-xs text-slate-500">Organized learning sets.</p>
+          <div>
+            <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Sequência</p>
+            <p className="text-2xl font-black text-slate-900 mt-0.5">
+              {stats?.streak || 0} <span className="text-xs font-semibold text-slate-500">{stats?.streak === 1 ? "dia" : "dias"}</span>
+            </p>
+          </div>
         </div>
 
-        <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-          <div className="flex items-center justify-between">
-            <span className="text-sm font-medium text-slate-500">Flashcards</span>
-            <div className="rounded-xl bg-indigo-50 p-2 text-indigo-600"><Layers size={20} /></div>
+        {/* Pendentes */}
+        <div className="group rounded-3xl border border-slate-200/80 bg-white p-6 shadow-xs hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex items-center gap-4">
+          <div className="grid h-14 w-14 place-items-center rounded-2xl bg-blue-50 text-blue-600 group-hover:bg-blue-600 group-hover:text-white transition-colors duration-300 shrink-0">
+            <BookOpen size={26} />
           </div>
-          <p className="mt-3 text-2xl font-bold text-slate-900">{totalCards}</p>
-          <p className="mt-1 text-xs text-slate-500">Cards available for review.</p>
+          <div>
+            <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Para Revisar</p>
+            <p className="text-2xl font-black text-slate-900 mt-0.5">
+              {stats?.dueCards || 0} <span className="text-xs font-semibold text-slate-500">cards</span>
+            </p>
+          </div>
         </div>
 
-        <div className="rounded-2xl border border-indigo-100 bg-indigo-50/50 p-5 shadow-sm">
-          <div className="flex items-center justify-between">
-            <span className="text-sm font-medium text-indigo-900">Due today</span>
-            <div className="rounded-xl bg-indigo-100 p-2 text-indigo-600"><Clock3 size={20} /></div>
+        {/* Revisados Hoje */}
+        <div className="group rounded-3xl border border-slate-200/80 bg-white p-6 shadow-xs hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex items-center gap-4">
+          <div className="grid h-14 w-14 place-items-center rounded-2xl bg-emerald-50 text-emerald-600 group-hover:bg-emerald-600 group-hover:text-white transition-colors duration-300 shrink-0">
+            <CheckCircle2 size={26} />
           </div>
-          <p className="mt-3 text-2xl font-bold text-indigo-950">{cardsDueToday}</p>
-          <p className="mt-1 text-xs text-indigo-600">Ready for your next study session.</p>
+          <div>
+            <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Revisados Hoje</p>
+            <p className="text-2xl font-black text-slate-900 mt-0.5">
+              {stats?.reviewedToday || 0} <span className="text-xs font-semibold text-slate-500">/ {stats?.dailyGoal || 10}</span>
+            </p>
+          </div>
         </div>
 
-        <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-          <div className="flex items-center justify-between">
-            <span className="text-sm font-medium text-slate-500">Study streak</span>
-            <div className="rounded-xl bg-amber-50 p-2 text-amber-600"><Flame size={20} /></div>
+        {/* Total Decks */}
+        <div className="group rounded-3xl border border-slate-200/80 bg-white p-6 shadow-xs hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex items-center gap-4">
+          <div className="grid h-14 w-14 place-items-center rounded-2xl bg-purple-50 text-purple-600 group-hover:bg-purple-600 group-hover:text-white transition-colors duration-300 shrink-0">
+            <Layers size={26} />
           </div>
-          <p className="mt-3 text-2xl font-bold text-slate-900">{streak} days</p>
-          <p className="mt-1 text-xs text-slate-500">Keep your momentum alive.</p>
+          <div>
+            <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Baralhos</p>
+            <p className="text-2xl font-black text-slate-900 mt-0.5">
+              {stats?.totalDecks || 0} <span className="text-xs font-semibold text-slate-500">({stats?.totalCards || 0} cards)</span>
+            </p>
+          </div>
         </div>
       </div>
 
-      {/* Charts Grid */}
-      <div className="grid gap-4 xl:grid-cols-2">
-        <ProgressChart data={progressData} />
-        <ActivityChart data={activityData} />
-      </div>
-
-      {/* Decks + Summary Section */}
-      <div className="grid gap-4 xl:grid-cols-[1.5fr_.85fr]">
-        <div className="space-y-5 rounded-2xl border border-slate-200/80 bg-white p-6 shadow-sm">
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+      {/* Barra de Meta Diária Estilizada */}
+      <div className="rounded-3xl border border-slate-200/80 bg-white p-6 md:p-8 shadow-sm space-y-4">
+        <div className="flex justify-between items-center">
+          <div className="flex items-center gap-3">
+            <div className="p-2.5 bg-blue-50 text-blue-600 rounded-2xl">
+              <TrendingUp size={20} />
+            </div>
             <div>
-              <h2 className="text-lg font-bold text-slate-900">My Decks</h2>
-              <p className="text-xs text-slate-500">Library</p>
+              <h3 className="font-bold text-slate-900 text-base">Meta Diária de Estudo</h3>
+              <p className="text-xs text-slate-500 mt-0.5 font-medium">
+                {stats?.reviewedToday >= stats?.dailyGoal
+                  ? "🎉 Incrível! Meta diária concluída com sucesso!"
+                  : `Faltam ${Math.max(0, (stats?.dailyGoal || 10) - (stats?.reviewedToday || 0))} cards para atingir seu objetivo de hoje.`}
+              </p>
             </div>
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-              <div className="flex items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 px-3 py-1.5">
-                <Search size={15} className="text-slate-400" />
-                <input
-                  type="text"
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                  placeholder="Search decks"
-                  className="h-7 w-full border-0 bg-transparent px-0 py-0 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-0"
-                />
-              </div>
-              <button
-                onClick={() => handleOpenModal()}
-                className="flex items-center justify-center gap-2 rounded-lg bg-indigo-600 px-3 py-2 text-xs font-semibold text-white transition hover:bg-indigo-700"
+          </div>
+          <span className="text-xs font-black text-blue-600 bg-blue-50 border border-blue-100 px-3 py-1.5 rounded-xl">
+            {Math.round(goalPercentage)}%
+          </span>
+        </div>
+        <div className="h-3 w-full rounded-full bg-slate-100 overflow-hidden p-0.5 border border-slate-200/60">
+          <div
+            className="h-full rounded-full bg-gradient-to-r from-blue-600 to-indigo-600 transition-all duration-700 ease-out"
+            style={{ width: `${goalPercentage}%` }}
+          />
+        </div>
+      </div>
+
+      {/* Lista de Baralhos Ativos */}
+      <div className="space-y-6">
+        <div className="flex justify-between items-center">
+          <div>
+            <h2 className="text-xl font-bold text-slate-900">Seus Baralhos em Andamento</h2>
+            <p className="text-xs text-slate-500 mt-0.5">Acesse rapidamente seus conjuntos mais recentes.</p>
+          </div>
+          <Link
+            to="/decks"
+            className="inline-flex items-center gap-1.5 text-xs font-bold text-blue-600 hover:text-blue-700 transition"
+          >
+            Ver biblioteca completa <ArrowRight size={14} />
+          </Link>
+        </div>
+
+        {decks.length === 0 ? (
+          <div className="rounded-3xl border border-dashed border-slate-300 bg-slate-50/50 p-12 text-center space-y-4">
+            <p className="text-sm text-slate-500 font-medium">Você ainda não possui baralhos cadastrados.</p>
+            <Link
+              to="/decks"
+              className="inline-flex items-center gap-2 rounded-2xl bg-blue-600 px-5 py-3 text-xs font-bold text-white hover:bg-blue-500 transition shadow-md"
+            >
+              <Plus size={16} /> Criar Meu Primeiro Baralho
+            </Link>
+          </div>
+        ) : (
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {decks.slice(0, 6).map((deck) => (
+              <div
+                key={deck._id}
+                className="group rounded-3xl border border-slate-200/80 bg-white p-6 shadow-xs hover:shadow-xl hover:border-blue-300 transition-all duration-300 flex flex-col justify-between space-y-5"
               >
-                <Plus size={15} />
-                New deck
-              </button>
-            </div>
-          </div>
-
-          {error && (
-            <div className="rounded-2xl bg-rose-50 p-4 text-sm font-medium text-rose-700">
-              {error}
-            </div>
-          )}
-
-          <div className="grid gap-3 lg:grid-cols-2">
-            {loading ? (
-              <p className="col-span-full text-sm text-slate-500">Loading decks...</p>
-            ) : filteredDecks.length ? (
-              filteredDecks.map((deck) => (
-                <DeckCard
-                  key={deck._id}
-                  deck={deck}
-                  dueCount={dueByDeck[deck._id] || 0}
-                  onDelete={handleDelete}
-                  onEdit={(d) => handleOpenModal(d)}
-                />
-              ))
-            ) : (
-              <div className="col-span-full rounded-xl border border-dashed border-slate-300 bg-slate-50 p-8 text-center">
-                <BookOpen size={32} className="mx-auto text-slate-300" />
-                <h3 className="mt-3 text-base font-bold text-slate-900">No decks found</h3>
-                <button
-                  onClick={() => handleOpenModal()}
-                  className="mt-4 rounded-lg bg-indigo-600 px-3 py-2 text-xs font-semibold text-white transition hover:bg-indigo-700"
-                >
-                  Create deck
-                </button>
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Right Sidebar Details */}
-        <div className="space-y-4">
-          <div className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm">
-            <div className="flex items-center justify-between gap-4">
-              <div>
-                <p className="text-[0.6rem] font-semibold uppercase tracking-[0.2em] text-slate-400">Today’s focus</p>
-                <h3 className="mt-1 text-lg font-bold text-slate-950">Review plan</h3>
-              </div>
-              <span className="rounded-full bg-blue-50 px-2.5 py-1 text-xs font-semibold text-blue-700">Ready</span>
-            </div>
-            <div className="mt-4 grid gap-3 sm:grid-cols-2">
-              <div className="rounded-xl bg-slate-50 p-4">
-                <p className="text-[0.6rem] uppercase tracking-[0.2em] text-slate-400">Due cards</p>
-                <p className="mt-2 text-2xl font-bold text-slate-950">{cardsDueToday}</p>
-                <p className="mt-1 text-xs text-slate-500">ready to study today</p>
-              </div>
-              <div className="rounded-xl bg-slate-50 p-4">
-                <p className="text-[0.6rem] uppercase tracking-[0.2em] text-slate-400">Streak</p>
-                <p className="mt-2 text-2xl font-bold text-slate-950">{streak} days</p>
-                <p className="mt-1 text-xs text-slate-500">keep the momentum alive</p>
-              </div>
-            </div>
-          </div>
-
-          <CategoryChart data={categoryData} />
-
-          <div className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm">
-            <div className="flex items-center justify-between gap-4">
-              <div>
-                <p className="text-[0.6rem] font-semibold uppercase tracking-[0.2em] text-slate-400">Recent decks</p>
-                <h3 className="mt-1 text-lg font-bold text-slate-950">Activity overview</h3>
-              </div>
-              <span className="rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-700">
-                {recentDecks.length} live
-              </span>
-            </div>
-            <div className="mt-4 space-y-2">
-              {recentDecks.length ? (
-                recentDecks.map((deck) => (
-                  <div key={deck._id} className="rounded-xl border border-slate-200/80 bg-slate-50 px-3 py-3">
-                    <div className="flex items-center justify-between gap-4">
-                      <div>
-                        <h4 className="text-sm font-semibold text-slate-950">{deck.title}</h4>
-                        <p className="mt-1 text-xs text-slate-500">{deck.totalCards || 0} cards</p>
-                      </div>
-                      <span className="rounded-full bg-slate-100 px-3 py-1 text-[0.65rem] font-semibold uppercase tracking-[0.22em] text-slate-600">
-                        {dueByDeck[deck._id] > 0 ? "review" : "clear"}
-                      </span>
-                    </div>
+                <div>
+                  <div className="flex items-center justify-between mb-3">
+                    <span className="text-[10px] font-bold uppercase tracking-wider bg-slate-100 text-slate-600 px-2.5 py-1 rounded-lg">
+                      {deck.category || "Geral"}
+                    </span>
                   </div>
-                ))
-              ) : (
-                <p className="text-sm text-slate-500">No recent decks yet.</p>
-              )}
-            </div>
+                  <h3 className="font-bold text-slate-900 text-lg group-hover:text-blue-600 transition">
+                    {deck.title}
+                  </h3>
+                  {deck.description && (
+                    <p className="text-xs text-slate-500 mt-2 line-clamp-2 leading-relaxed">
+                      {deck.description}
+                    </p>
+                  )}
+                </div>
+
+                <div className="flex items-center justify-between pt-4 border-t border-slate-100">
+                  <span className="text-xs font-medium text-slate-400">
+                    {deck.cardsCount || 0} cards
+                  </span>
+                  <Link
+                    to={`/study/${deck._id}`}
+                    className="inline-flex items-center gap-1.5 rounded-xl bg-blue-50 px-3.5 py-2 text-xs font-bold text-blue-600 hover:bg-blue-600 hover:text-white transition-all duration-200"
+                  >
+                    <Play size={13} className="fill-current" /> Estudar
+                  </Link>
+                </div>
+              </div>
+            ))}
           </div>
-        </div>
+        )}
       </div>
     </div>
   );
