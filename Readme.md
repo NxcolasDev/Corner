@@ -14,7 +14,7 @@
 # Corner
 
 <div align="center">
-  <img src="Assets/logo.png" alt="Corner Logo" width="160" />
+  <img src="Assets/logo.png" alt="Corner Banner" width="720" />
 </div>
 
 Corner is a focused flashcard study application that helps learners manage decks, review cards, and track study momentum through a lightweight spaced-repetition workflow. The project exists to make study sessions easier to organize, easier to revisit, and easier to sustain over time.
