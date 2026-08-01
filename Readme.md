@@ -21,6 +21,10 @@ Corner is a focused flashcard study application that helps learners manage decks
 
 At its core, the product follows the spaced repetition learning philosophy: memory strengthens when a concept is revisited just before it is likely to be forgotten. Corner turns that principle into a simple “review, rate, and re-schedule” loop built around deck-based flashcards.
 
+## Current Status
+
+This repository reflects the initial version of Corner. The base experience is already functional and includes the core study workflow, authentication, deck and flashcard management, dashboard insights, and supporting pages. Future releases will continue to expand the app with new additions and planned improvements.
+
 ## Features
 
 Corner is a focused flashcard study application that helps learners manage decks, review cards, and track study momentum through a lightweight spaced-repetition workflow. The project exists to make study sessions easier to organize, easier to revisit, and easier to sustain over time.
@@ -396,15 +400,7 @@ Corner already includes several accessibility-friendly patterns:
 
 ## Author
 
-Photo
-
-LinkedIn
-
-GitHub
-
-Portfolio
-
-Email
+Nicolas de Jesu Silva
 
 ## License
 
