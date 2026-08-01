@@ -36,6 +36,16 @@ const flashcardSchema = new mongoose.Schema(
             default: Date.now
         },
 
+        intervalDays: {
+            type: Number,
+            default: 0
+        },
+
+        easeFactor: {
+            type: Number,
+            default: 2.5
+        },
+
         reviewCount: {
             type: Number,
             default: 0
@@ -46,9 +56,6 @@ const flashcardSchema = new mongoose.Schema(
     }
 );
 
-const Flashcard = mongoose.model(
-    'Flashcard',
-    flashcardSchema
-);
+const Flashcard = mongoose.models.Flashcard || mongoose.model('Flashcard', flashcardSchema);
 
 export default Flashcard;

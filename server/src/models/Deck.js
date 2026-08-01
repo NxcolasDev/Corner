@@ -34,6 +34,5 @@ const deckSchema = new mongoose.Schema(
     }
 );
 
-const Deck = mongoose.model('Deck', deckSchema);
-
+const Deck = mongoose.models.Deck || mongoose.model('Deck', deckSchema);
 export default Deck;
