@@ -1,6 +1,6 @@
 import User from "../models/User.js";
 import Deck from "../models/Deck.js";
-import Flashcard from "../models/flashcard.js"; 
+import Flashcard from "../models/Flashcard.js";
 
 // Busca os dados do usuário logado
 export const getMe = async (req, res) => {

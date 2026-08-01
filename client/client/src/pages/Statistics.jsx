@@ -53,56 +53,60 @@ const Statistics = () => {
   ];
 
   return (
-    <div className="space-y-6 max-w-6xl mx-auto">
-      <section className="rounded-3xl border border-slate-100 bg-white p-6 md:p-8 shadow-sm">
+    <div className="mx-auto max-w-6xl space-y-6 p-4 md:p-8">
+      <section className="rounded-[32px] bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 p-6 text-white shadow-[0_24px_80px_-40px_rgba(15,23,42,0.75)] md:p-8">
         <div className="flex items-center gap-3">
-          <div className="p-3 rounded-2xl bg-blue-50 text-blue-600">
+          <div className="grid h-14 w-14 shrink-0 place-items-center rounded-2xl bg-blue-50 text-blue-600">
             <BarChart3 size={28} />
           </div>
           <div>
-            <h1 className="text-3xl font-black text-slate-900">Estatísticas</h1>
-            <p className="text-sm text-slate-500">Métricas calculadas dinamicamente a partir da sua conta.</p>
+            <div className="mb-2 inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-xs font-semibold text-blue-300 backdrop-blur-md">
+              <BarChart3 size={14} /> Estatísticas
+            </div>
+            <h1 className="text-3xl font-black tracking-tight">Estatísticas</h1>
+            <p className="mt-2 text-sm text-slate-300">
+              Métricas calculadas dinamicamente a partir da sua conta.
+            </p>
           </div>
         </div>
       </section>
 
-      {/* Cards de Métricas */}
       <div className="grid gap-4 sm:grid-cols-3">
-        <div className="rounded-3xl border border-slate-100 bg-white p-5 shadow-sm flex items-center gap-4">
-          <div className="p-3 rounded-2xl bg-blue-50 text-blue-600">
+        <div className="group flex items-center gap-4 rounded-[28px] border border-slate-200/80 bg-white p-5 shadow-[0_12px_36px_-28px_rgba(15,23,42,0.55)] transition-all duration-300 hover:-translate-y-1 hover:shadow-xl">
+          <div className="grid h-14 w-14 shrink-0 place-items-center rounded-2xl bg-blue-50 text-blue-600 transition-colors duration-300 group-hover:bg-blue-600 group-hover:text-white">
             <Layers size={24} />
           </div>
           <div>
-            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Baralhos Criados</p>
-            <p className="text-2xl font-black text-slate-900">{loading ? "..." : decks.length}</p>
+            <p className="text-[10px] font-bold uppercase tracking-[0.24em] text-slate-400">Baralhos Criados</p>
+            <p className="mt-0.5 text-2xl font-black text-slate-900">{loading ? "..." : decks.length}</p>
           </div>
         </div>
 
-        <div className="rounded-3xl border border-slate-100 bg-white p-5 shadow-sm flex items-center gap-4">
-          <div className="p-3 rounded-2xl bg-emerald-50 text-emerald-600">
+        <div className="group flex items-center gap-4 rounded-[28px] border border-slate-200/80 bg-white p-5 shadow-[0_12px_36px_-28px_rgba(15,23,42,0.55)] transition-all duration-300 hover:-translate-y-1 hover:shadow-xl">
+          <div className="grid h-14 w-14 shrink-0 place-items-center rounded-2xl bg-emerald-50 text-emerald-600 transition-colors duration-300 group-hover:bg-emerald-600 group-hover:text-white">
             <BookOpen size={24} />
           </div>
           <div>
-            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Categorias Ativas</p>
-            <p className="text-2xl font-black text-slate-900">
+            <p className="text-[10px] font-bold uppercase tracking-[0.24em] text-slate-400">Categorias Ativas</p>
+            <p className="mt-0.5 text-2xl font-black text-slate-900">
               {loading ? "..." : Object.keys(categoryCount).length}
             </p>
           </div>
         </div>
 
-        <div className="rounded-3xl border border-slate-100 bg-white p-5 shadow-sm flex items-center gap-4">
-          <div className="p-3 rounded-2xl bg-indigo-50 text-indigo-600">
+        <div className="group flex items-center gap-4 rounded-[28px] border border-slate-200/80 bg-white p-5 shadow-[0_12px_36px_-28px_rgba(15,23,42,0.55)] transition-all duration-300 hover:-translate-y-1 hover:shadow-xl">
+          <div className="grid h-14 w-14 shrink-0 place-items-center rounded-2xl bg-indigo-50 text-indigo-600 transition-colors duration-300 group-hover:bg-indigo-600 group-hover:text-white">
             <CheckCircle2 size={24} />
           </div>
           <div>
-            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Status da Conta</p>
-            <p className="text-2xl font-black text-slate-900">Ativa</p>
+            <p className="text-[10px] font-bold uppercase tracking-[0.24em] text-slate-400">Status da Conta</p>
+            <p className="mt-0.5 text-2xl font-black text-slate-900">Ativa</p>
           </div>
         </div>
       </div>
 
       {loading ? (
-        <p className="text-center py-12 text-slate-400 font-semibold animate-pulse">Carregando métricas...</p>
+        <p className="animate-pulse py-12 text-center text-sm font-semibold text-slate-400">Carregando métricas...</p>
       ) : (
         <>
           <div className="grid gap-6 md:grid-cols-2">

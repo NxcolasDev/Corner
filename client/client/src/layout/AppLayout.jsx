@@ -12,10 +12,12 @@ const AppLayout = () => {
   };
 
   return (
-    <div className="flex min-h-screen bg-[#F8FAFC] text-slate-800 antialiased font-sans">
+    <div className="flex min-h-screen bg-[linear-gradient(180deg,#f8fbff_0%,#f6f9ff_48%,#eef4ff_100%)] text-slate-800 antialiased font-sans">
       <Sidebar user={user} onLogout={handleLogout} />
-      <main className="flex-1 w-full min-w-0 overflow-y-auto">
-        <Outlet />
+      <main className="flex-1 min-w-0 overflow-y-auto bg-transparent">
+        <div className="min-h-screen">
+          <Outlet />
+        </div>
       </main>
     </div>
   );

@@ -27,7 +27,7 @@ const Study = () => {
   const [error, setError] = useState(null);
   const [streakResult, setStreakResult] = useState(null);
 
-  const loadFlashcards = async () => {
+  const loadFlashcards = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
@@ -54,11 +54,11 @@ const Study = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [deckId]);
 
   useEffect(() => {
     loadFlashcards();
-  }, [deckId]);
+  }, [deckId, loadFlashcards]);
 
   const currentCard = flashcards[currentIndex];
 
@@ -202,29 +202,28 @@ const Study = () => {
   const progressPercentage = totalDue ? Math.min(((reviewedCount + 1) / totalDue) * 100, 100) : 0;
 
   return (
-    <div className="space-y-6 max-w-5xl mx-auto p-4 md:p-8">
+    <div className="mx-auto max-w-6xl space-y-6 p-4 md:p-8">
       {error && (
-        <div className="p-4 rounded-2xl bg-rose-50 border border-rose-200 text-rose-700 text-xs font-bold">
+        <div className="rounded-2xl border border-rose-200 bg-rose-50 p-4 text-xs font-bold text-rose-700">
           {error}
         </div>
       )}
 
-      {/* Header & Progresso */}
-      <section className="rounded-3xl bg-white p-6 shadow-sm border border-slate-100">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <section className="rounded-[32px] border border-slate-200/80 bg-white p-5 shadow-[0_12px_36px_-28px_rgba(15,23,42,0.55)] md:p-6">
+        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div>
             <Link
               to={`/decks/${deckId}`}
-              className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-slate-400 hover:text-slate-700 transition mb-2"
+              className="mb-2 inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-[0.24em] text-slate-400 transition hover:text-slate-700"
             >
               <ArrowLeft size={14} /> Sair do Treino
             </Link>
-            <h2 className="text-2xl md:text-3xl font-black text-slate-900">{deckName}</h2>
+            <h2 className="text-2xl font-black tracking-tight text-slate-900 md:text-3xl">{deckName}</h2>
           </div>
 
-          <div className="flex items-center gap-4 bg-slate-50 px-5 py-3 rounded-2xl border border-slate-100">
+          <div className="flex items-center gap-4 rounded-2xl border border-slate-100 bg-slate-50 px-5 py-3">
             <div>
-              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Cartão Atual</p>
+              <p className="text-[10px] font-bold uppercase tracking-[0.28em] text-slate-400">Cartão Atual</p>
               <p className="text-xl font-black text-slate-900">
                 {Math.min(reviewedCount + 1, totalDue)}{" "}
                 <span className="text-sm font-semibold text-slate-400">/ {totalDue}</span>
@@ -233,16 +232,15 @@ const Study = () => {
           </div>
         </div>
 
-        <div className="mt-6 h-2.5 w-full rounded-full bg-slate-100 overflow-hidden">
+        <div className="mt-6 h-2.5 w-full overflow-hidden rounded-full bg-slate-100">
           <div
-            className="h-full rounded-full bg-blue-600 transition-all duration-300"
+            className="h-full rounded-full bg-gradient-to-r from-blue-600 to-indigo-600 transition-all duration-300"
             style={{ width: `${progressPercentage}%` }}
           />
         </div>
       </section>
 
-      {/* Grid Principal */}
-      <section className="grid gap-6 lg:grid-cols-12 items-start">
+      <section className="grid items-start gap-6 lg:grid-cols-12">
         <div className="lg:col-span-8">
           <StudyCard
             flashcard={currentCard}
@@ -252,12 +250,12 @@ const Study = () => {
           />
         </div>
 
-        <div className="lg:col-span-4 space-y-4">
-          <div className="rounded-3xl border border-slate-100 bg-white p-6 shadow-sm">
-            <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">
+        <div className="space-y-4 lg:col-span-4">
+          <div className="rounded-[28px] border border-slate-200/80 bg-white p-5 shadow-[0_12px_36px_-28px_rgba(15,23,42,0.55)] md:p-6">
+            <h3 className="mb-2 text-xs font-bold uppercase tracking-[0.24em] text-slate-400">
               Grau de Dificuldade
             </h3>
-            <p className="text-xs text-slate-500 mb-4">
+            <p className="mb-4 text-xs text-slate-500">
               Qual foi a facilidade para lembrar da resposta?
             </p>
 
@@ -265,61 +263,61 @@ const Study = () => {
               <button
                 type="button"
                 onClick={() => handleReview("again")}
-                className="w-full rounded-2xl border border-rose-200 bg-rose-50/60 p-3.5 text-left transition hover:bg-rose-100 active:scale-95 group flex items-center justify-between"
+                className="group flex w-full items-center justify-between rounded-2xl border border-rose-200 bg-rose-50/60 p-3.5 text-left transition hover:bg-rose-100 active:scale-95"
               >
                 <div>
-                  <span className="block font-bold text-rose-800 text-sm">De novo</span>
+                  <span className="block text-sm font-bold text-rose-800">De novo</span>
                   <span className="block text-[11px] text-rose-600/80">Errei / Revisar logo</span>
                 </div>
-                <span className="text-xs font-bold bg-rose-200/60 text-rose-800 px-2 py-1 rounded-lg">1</span>
+                <span className="rounded-lg bg-rose-200/60 px-2 py-1 text-xs font-bold text-rose-800">1</span>
               </button>
 
               <button
                 type="button"
                 onClick={() => handleReview("hard")}
-                className="w-full rounded-2xl border border-amber-200 bg-amber-50/60 p-3.5 text-left transition hover:bg-amber-100 active:scale-95 group flex items-center justify-between"
+                className="group flex w-full items-center justify-between rounded-2xl border border-amber-200 bg-amber-50/60 p-3.5 text-left transition hover:bg-amber-100 active:scale-95"
               >
                 <div>
-                  <span className="block font-bold text-amber-900 text-sm">Difícil</span>
+                  <span className="block text-sm font-bold text-amber-900">Difícil</span>
                   <span className="block text-[11px] text-amber-700/80">Com esforço</span>
                 </div>
-                <span className="text-xs font-bold bg-amber-200/60 text-amber-900 px-2 py-1 rounded-lg">2</span>
+                <span className="rounded-lg bg-amber-200/60 px-2 py-1 text-xs font-bold text-amber-900">2</span>
               </button>
 
               <button
                 type="button"
                 onClick={() => handleReview("medium")}
-                className="w-full rounded-2xl border border-blue-200 bg-blue-50/60 p-3.5 text-left transition hover:bg-blue-100 active:scale-95 group flex items-center justify-between"
+                className="group flex w-full items-center justify-between rounded-2xl border border-blue-200 bg-blue-50/60 p-3.5 text-left transition hover:bg-blue-100 active:scale-95"
               >
                 <div>
-                  <span className="block font-bold text-blue-900 text-sm">Bom</span>
+                  <span className="block text-sm font-bold text-blue-900">Bom</span>
                   <span className="block text-[11px] text-blue-700/80">Intervalo normal</span>
                 </div>
-                <span className="text-xs font-bold bg-blue-200/60 text-blue-900 px-2 py-1 rounded-lg">3</span>
+                <span className="rounded-lg bg-blue-200/60 px-2 py-1 text-xs font-bold text-blue-900">3</span>
               </button>
 
               <button
                 type="button"
                 onClick={() => handleReview("easy")}
-                className="w-full rounded-2xl border border-emerald-200 bg-emerald-50/60 p-3.5 text-left transition hover:bg-emerald-100 active:scale-95 group flex items-center justify-between"
+                className="group flex w-full items-center justify-between rounded-2xl border border-emerald-200 bg-emerald-50/60 p-3.5 text-left transition hover:bg-emerald-100 active:scale-95"
               >
                 <div>
-                  <span className="block font-bold text-emerald-900 text-sm">Fácil</span>
+                  <span className="block text-sm font-bold text-emerald-900">Fácil</span>
                   <span className="block text-[11px] text-emerald-700/80">Lembrei instantaneamente</span>
                 </div>
-                <span className="text-xs font-bold bg-emerald-200/60 text-emerald-900 px-2 py-1 rounded-lg">4</span>
+                <span className="rounded-lg bg-emerald-200/60 px-2 py-1 text-xs font-bold text-emerald-900">4</span>
               </button>
             </div>
           </div>
 
-          <div className="rounded-3xl border border-slate-100 bg-slate-50 p-4 text-xs text-slate-500 flex items-start gap-3">
-            <Keyboard size={18} className="text-slate-400 shrink-0 mt-0.5" />
+          <div className="flex items-start gap-3 rounded-[28px] border border-slate-200/80 bg-slate-50 p-4 text-xs text-slate-500 shadow-[0_12px_36px_-28px_rgba(15,23,42,0.55)]">
+            <Keyboard size={18} className="mt-0.5 shrink-0 text-slate-400" />
             <div>
-              <p className="font-bold text-slate-700 mb-0.5">Atalhos:</p>
+              <p className="mb-0.5 font-bold text-slate-700">Atalhos:</p>
               <p>
-                <code className="bg-white px-1.5 py-0.5 rounded border border-slate-200 font-mono text-[10px] text-slate-800">Espaço</code> virar |{" "}
-                <code className="bg-white px-1.5 py-0.5 rounded border border-slate-200 font-mono text-[10px] text-slate-800">1-4</code> avaliar |{" "}
-                <code className="bg-white px-1.5 py-0.5 rounded border border-slate-200 font-mono text-[10px] text-slate-800">S</code> áudio
+                <code className="rounded border border-slate-200 bg-white px-1.5 py-0.5 font-mono text-[10px] text-slate-800">Espaço</code> virar |{" "}
+                <code className="rounded border border-slate-200 bg-white px-1.5 py-0.5 font-mono text-[10px] text-slate-800">1-4</code> avaliar |{" "}
+                <code className="rounded border border-slate-200 bg-white px-1.5 py-0.5 font-mono text-[10px] text-slate-800">S</code> áudio
               </p>
             </div>
           </div>

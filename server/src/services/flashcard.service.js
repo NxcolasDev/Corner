@@ -1,5 +1,5 @@
-import Flashcard from '../models/flashcard.js';
-import Deck from '../models/deck.js';
+import Flashcard from '../models/Flashcard.js';
+import Deck from '../models/Deck.js';
 
 /**
  * Aplica o Algoritmo SuperMemo-2 (SM-2) para agendamento de repetição espaçada.

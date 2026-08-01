@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import FlashcardRow from "../components/cards/FlashcardRow";
 import DeckFormModal from "../components/forms/DeckFormModal";
@@ -45,7 +45,7 @@ const DeckDetails = () => {
   });
   const [error, setError] = useState(null);
 
-  const loadDeck = async () => {
+  const loadDeck = useCallback(async () => {
     try {
       setLoading(true);
       const decks = await fetchDecks();
@@ -64,11 +64,11 @@ const DeckDetails = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [deckId]);
 
   useEffect(() => {
     loadDeck();
-  }, [deckId]);
+  }, [deckId, loadDeck]);
 
   const handleSaveDeck = async (e) => {
     e.preventDefault();
@@ -168,7 +168,7 @@ const DeckDetails = () => {
               });
               setFlashcards((prev) => [created, ...prev]);
               importedCount++;
-            } catch (err) {
+            } catch {
               console.error("Erro ao importar linha:", line);
             }
           }
@@ -233,7 +233,7 @@ const DeckDetails = () => {
   }
 
   return (
-    <div className="space-y-8 max-w-7xl mx-auto p-4 md:p-8">
+    <div className="mx-auto max-w-7xl space-y-6 p-4 md:p-8">
       <DeckFormModal
         isOpen={isDeckModalOpen}
         editingDeck={editingDeck}
@@ -243,11 +243,10 @@ const DeckDetails = () => {
         onFieldChange={(field, val) => setDeckForm((prev) => ({ ...prev, [field]: val }))}
       />
 
-      {/* Top Banner / Capa do Deck */}
-      <section className="relative overflow-hidden rounded-3xl bg-slate-900 text-white shadow-xl min-h-[220px] flex flex-col justify-between p-6 md:p-8">
+      <section className="relative flex min-h-[220px] flex-col justify-between overflow-hidden rounded-[32px] bg-slate-900 p-6 text-white shadow-[0_24px_80px_-40px_rgba(15,23,42,0.75)] md:p-8">
         {deck.imageUrl && (
           <div className="absolute inset-0 z-0 opacity-20">
-            <img src={deck.imageUrl} alt={deck.title} className="w-full h-full object-cover" />
+            <img src={deck.imageUrl} alt={deck.title} className="h-full w-full object-cover" />
             <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-900/80 to-transparent" />
           </div>
         )}
@@ -255,30 +254,29 @@ const DeckDetails = () => {
         <div className="relative z-10">
           <Link
             to="/dashboard"
-            className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-slate-400 hover:text-white transition mb-4"
+            className="mb-4 inline-flex items-center gap-2 text-xs font-bold uppercase tracking-[0.24em] text-slate-400 transition hover:text-white"
           >
             <ArrowLeft size={16} /> Voltar ao Dashboard
           </Link>
 
-          <div className="flex items-center gap-2 mb-2">
-            <span className="inline-flex items-center gap-1 bg-white/10 backdrop-blur-md px-3 py-1 rounded-xl text-xs font-bold text-blue-300">
+          <div className="mb-2 flex items-center gap-2">
+            <span className="inline-flex items-center gap-1 rounded-xl bg-white/10 px-3 py-1 text-xs font-bold text-blue-300 backdrop-blur-md">
               <Tag size={12} /> {deck.category || "Outros"}
             </span>
           </div>
 
-          <h1 className="text-3xl md:text-5xl font-black tracking-tight">{deck.title}</h1>
-          <p className="mt-2 text-slate-300 text-sm max-w-2xl leading-relaxed">
+          <h1 className="text-3xl font-black tracking-tight md:text-5xl">{deck.title}</h1>
+          <p className="mt-2 max-w-2xl text-sm leading-relaxed text-slate-300">
             {deck.description || "Sem descrição informada."}
           </p>
         </div>
 
-        <div className="relative z-10 pt-6 flex flex-wrap items-center justify-between gap-4 border-t border-white/10 mt-4">
+        <div className="relative z-10 mt-4 flex flex-wrap items-center justify-between gap-4 border-t border-white/10 pt-6">
           <div className="text-xs font-semibold text-slate-400">
-            Total de cartões: <span className="text-white font-bold">{flashcards.length}</span>
+            Total de cartões: <span className="font-bold text-white">{flashcards.length}</span>
           </div>
 
           <div className="flex items-center gap-3">
-            {/* Input Oculto para Importação TXT/CSV */}
             <input
               type="file"
               ref={fileInputRef}
@@ -286,11 +284,11 @@ const DeckDetails = () => {
               accept=".txt,.csv"
               className="hidden"
             />
-            
+
             <button
               onClick={() => fileInputRef.current?.click()}
               disabled={isImporting}
-              className="inline-flex items-center gap-2 rounded-2xl bg-slate-800 border border-slate-700 px-4 py-3 font-semibold text-xs text-slate-200 hover:bg-slate-700 transition"
+              className="inline-flex items-center gap-2 rounded-2xl border border-slate-700 bg-slate-800 px-4 py-3 text-xs font-semibold text-slate-200 transition hover:bg-slate-700"
               title="Importar cards via TXT ou CSV"
             >
               <Upload size={15} />
@@ -299,21 +297,21 @@ const DeckDetails = () => {
 
             <button
               onClick={handleOpenDeckModal}
-              className="p-3 rounded-2xl border border-white/10 bg-white/5 hover:bg-white/10 text-slate-200 transition"
+              className="rounded-2xl border border-white/10 bg-white/5 p-3 text-slate-200 transition hover:bg-white/10"
               title="Editar Deck"
             >
               <Edit2 size={16} />
             </button>
             <button
               onClick={handleDeleteDeck}
-              className="p-3 rounded-2xl border border-rose-500/20 bg-rose-500/10 text-rose-400 hover:bg-rose-500/20 transition"
+              className="rounded-2xl border border-rose-500/20 bg-rose-500/10 p-3 text-rose-400 transition hover:bg-rose-500/20"
               title="Excluir Deck"
             >
               <Trash2 size={16} />
             </button>
             <Link
               to={`/study/${deckId}`}
-              className="inline-flex items-center gap-2 rounded-2xl bg-blue-600 px-6 py-3 font-bold text-white hover:bg-blue-500 transition shadow-lg shadow-blue-600/30 text-sm"
+              className="inline-flex items-center gap-2 rounded-2xl bg-blue-600 px-6 py-3 text-sm font-bold text-white shadow-lg shadow-blue-600/30 transition hover:bg-blue-500"
             >
               <Play size={16} fill="currentColor" /> Estudar Agora
             </Link>
@@ -322,18 +320,15 @@ const DeckDetails = () => {
       </section>
 
       {error && (
-        <div className="rounded-2xl bg-rose-50 border border-rose-200 p-4 text-sm font-semibold text-rose-700">
+        <div className="rounded-2xl border border-rose-200 bg-rose-50 p-4 text-sm font-semibold text-rose-700">
           {error}
         </div>
       )}
 
-      {/* Main Grid Layout */}
-      <section className="grid gap-8 lg:grid-cols-12 items-start">
-        
-        {/* Formulário de Novo/Editar Flashcard */}
-        <div className="lg:col-span-5 rounded-3xl bg-white p-6 md:p-8 border border-slate-100 shadow-sm">
-          <div className="flex items-center justify-between mb-6">
-            <h3 className="text-lg font-bold text-slate-900 flex items-center gap-2">
+      <section className="grid items-start gap-6 lg:grid-cols-12">
+        <div className="rounded-[28px] border border-slate-200/80 bg-white p-5 shadow-[0_12px_36px_-28px_rgba(15,23,42,0.55)] lg:col-span-5 md:p-6">
+          <div className="mb-6 flex items-center justify-between">
+            <h3 className="flex items-center gap-2 text-lg font-bold text-slate-900">
               <Sparkles size={18} className="text-blue-600" />
               {editingFlashcard ? "Editar Card" : "Novo Flashcard"}
             </h3>
@@ -344,7 +339,7 @@ const DeckDetails = () => {
                   setEditingFlashcard(null);
                   setCardForm({ front: "", back: "", tags: "", difficulty: "medium", imageUrl: "" });
                 }}
-                className="text-xs font-bold text-slate-400 hover:text-slate-600 transition"
+                className="text-xs font-bold text-slate-400 transition hover:text-slate-600"
               >
                 Cancelar
               </button>
@@ -353,7 +348,7 @@ const DeckDetails = () => {
 
           <form className="space-y-4" onSubmit={handleCreateOrUpdateCard}>
             <div>
-              <label className="text-xs font-bold uppercase tracking-wider text-slate-500">
+              <label className="text-xs font-bold uppercase tracking-[0.24em] text-slate-500">
                 Frente (Pergunta/Termo)
               </label>
               <textarea
@@ -362,12 +357,12 @@ const DeckDetails = () => {
                 required
                 rows={3}
                 placeholder="ex: What is 'spaced repetition'?"
-                className="mt-1.5 w-full rounded-2xl border border-slate-200 p-3.5 text-sm text-slate-900 bg-slate-50/50 outline-none focus:bg-white focus:border-blue-600 focus:ring-4 focus:ring-blue-600/10 transition resize-none"
+                className="mt-1.5 w-full resize-none rounded-2xl border border-slate-200 bg-slate-50/50 p-3.5 text-sm text-slate-900 outline-none transition focus:border-blue-600 focus:bg-white focus:ring-4 focus:ring-blue-600/10"
               />
             </div>
 
             <div>
-              <label className="text-xs font-bold uppercase tracking-wider text-slate-500">
+              <label className="text-xs font-bold uppercase tracking-[0.24em] text-slate-500">
                 Verso (Resposta/Definição)
               </label>
               <textarea
@@ -376,19 +371,19 @@ const DeckDetails = () => {
                 required
                 rows={3}
                 placeholder="ex: Uma técnica de aprendizado baseada na repetição espaçada."
-                className="mt-1.5 w-full rounded-2xl border border-slate-200 p-3.5 text-sm text-slate-900 bg-slate-50/50 outline-none focus:bg-white focus:border-blue-600 focus:ring-4 focus:ring-blue-600/10 transition resize-none"
+                className="mt-1.5 w-full resize-none rounded-2xl border border-slate-200 bg-slate-50/50 p-3.5 text-sm text-slate-900 outline-none transition focus:border-blue-600 focus:bg-white focus:ring-4 focus:ring-blue-600/10"
               />
             </div>
 
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="text-xs font-bold uppercase tracking-wider text-slate-500">
+                <label className="text-xs font-bold uppercase tracking-[0.24em] text-slate-500">
                   Dificuldade
                 </label>
                 <select
                   value={cardForm.difficulty}
                   onChange={(e) => setCardForm({ ...cardForm, difficulty: e.target.value })}
-                  className="mt-1.5 w-full rounded-2xl border border-slate-200 p-3.5 text-sm text-slate-900 bg-slate-50/50 outline-none focus:bg-white focus:border-blue-600 transition"
+                  className="mt-1.5 w-full rounded-2xl border border-slate-200 bg-slate-50/50 p-3.5 text-sm text-slate-900 outline-none transition focus:border-blue-600 focus:bg-white"
                 >
                   <option value="easy">Fácil</option>
                   <option value="medium">Médio</option>
@@ -397,7 +392,7 @@ const DeckDetails = () => {
               </div>
 
               <div>
-                <label className="text-xs font-bold uppercase tracking-wider text-slate-500">
+                <label className="text-xs font-bold uppercase tracking-[0.24em] text-slate-500">
                   Tags
                 </label>
                 <input
@@ -405,24 +400,24 @@ const DeckDetails = () => {
                   value={cardForm.tags}
                   onChange={(e) => setCardForm({ ...cardForm, tags: e.target.value })}
                   placeholder="vocab, b2"
-                  className="mt-1.5 w-full rounded-2xl border border-slate-200 p-3.5 text-sm text-slate-900 bg-slate-50/50 outline-none focus:bg-white focus:border-blue-600 transition"
+                  className="mt-1.5 w-full rounded-2xl border border-slate-200 bg-slate-50/50 p-3.5 text-sm text-slate-900 outline-none transition focus:border-blue-600 focus:bg-white"
                 />
               </div>
             </div>
 
             <div>
-              <label className="text-xs font-bold uppercase tracking-wider text-slate-500 flex items-center justify-between">
+              <label className="flex items-center justify-between text-xs font-bold uppercase tracking-[0.24em] text-slate-500">
                 <span>Imagem (URL ou Upload)</span>
               </label>
-              <div className="mt-1.5 flex gap-2 items-center">
+              <div className="mt-1.5 flex items-center gap-2">
                 <input
                   type="text"
                   value={cardForm.imageUrl}
                   onChange={(e) => setCardForm({ ...cardForm, imageUrl: e.target.value })}
                   placeholder="https://... ou escolha um arquivo"
-                  className="flex-1 rounded-2xl border border-slate-200 p-3.5 text-sm text-slate-900 bg-slate-50/50 outline-none focus:bg-white focus:border-blue-600 transition"
+                  className="flex-1 rounded-2xl border border-slate-200 bg-slate-50/50 p-3.5 text-sm text-slate-900 outline-none transition focus:border-blue-600 focus:bg-white"
                 />
-                <label className="cursor-pointer p-3.5 rounded-2xl bg-slate-100 hover:bg-slate-200 text-slate-600 transition flex items-center justify-center">
+                <label className="flex cursor-pointer items-center justify-center rounded-2xl bg-slate-100 p-3.5 text-slate-600 transition hover:bg-slate-200">
                   <ImageIcon size={18} />
                   <input
                     type="file"
@@ -436,17 +431,16 @@ const DeckDetails = () => {
 
             <button
               type="submit"
-              className="w-full mt-2 rounded-2xl bg-slate-900 py-3.5 text-sm font-bold text-white hover:bg-blue-600 transition shadow-md active:scale-95"
+              className="mt-2 w-full rounded-2xl bg-slate-900 py-3.5 text-sm font-bold text-white shadow-md transition hover:bg-blue-600 active:scale-95"
             >
               {editingFlashcard ? "Salvar Alterações" : "Adicionar Flashcard"}
             </button>
           </form>
         </div>
 
-        {/* Lista de Flashcards */}
-        <div className="lg:col-span-7 rounded-3xl bg-white p-6 md:p-8 border border-slate-100 shadow-sm">
-          <div className="flex items-center justify-between mb-6">
-            <h3 className="text-lg font-bold text-slate-900 flex items-center gap-2">
+        <div className="rounded-[28px] border border-slate-200/80 bg-white p-5 shadow-[0_12px_36px_-28px_rgba(15,23,42,0.55)] lg:col-span-7 md:p-6">
+          <div className="mb-6 flex items-center justify-between">
+            <h3 className="flex items-center gap-2 text-lg font-bold text-slate-900">
               <BookOpen size={18} className="text-slate-400" />
               Cards neste Deck ({flashcards.length})
             </h3>
@@ -463,10 +457,10 @@ const DeckDetails = () => {
                 />
               ))
             ) : (
-              <div className="py-16 text-center text-slate-400 border border-dashed border-slate-200 rounded-2xl">
+              <div className="rounded-2xl border border-dashed border-slate-200 py-16 text-center text-slate-400">
                 <FileText size={32} className="mx-auto mb-2 text-slate-300" />
                 <p className="font-bold text-slate-600">Nenhum card cadastrado ainda.</p>
-                <p className="text-xs mt-1">
+                <p className="mt-1 text-xs">
                   Crie um manualmente ao lado ou use o botão <b>"Importar .TXT / .CSV"</b> acima.
                 </p>
               </div>

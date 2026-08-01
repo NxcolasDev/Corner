@@ -7,9 +7,9 @@ import {
   StickyNote,
   Settings,
   LogOut,
-  Sparkles,
   User,
 } from "lucide-react";
+import cornerLogo from "../assets/logo/corner-logo.png";
 
 const Sidebar = ({ user, onLogout }) => {
   const location = useLocation();
@@ -29,18 +29,18 @@ const Sidebar = ({ user, onLogout }) => {
   const isActive = (path) => location.pathname === path;
 
   return (
-    <aside className="w-64 bg-[#0F172A] text-slate-300 flex flex-col justify-between h-screen sticky top-0 border-r border-slate-800/60 p-5 select-none shrink-0 z-20 overflow-y-auto">
+    <aside className="w-72 bg-[linear-gradient(180deg,#0f172a_0%,#0b1220_100%)] text-slate-300 flex flex-col justify-between h-screen sticky top-0 border-r border-slate-800/60 p-5 select-none shrink-0 z-20 overflow-y-auto shadow-[0_0_0_1px_rgba(255,255,255,0.02)]">
       {/* Brand & Logo */}
       <div className="space-y-7">
         <div className="flex items-center gap-3 px-2 py-1">
-          <div className="p-2.5 bg-blue-600 rounded-xl text-white shadow-md shadow-blue-500/20 flex items-center justify-center">
-            <Sparkles size={20} />
+          <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-blue-600/15 ring-1 ring-blue-400/25 shadow-lg shadow-blue-600/10">
+            <img src={cornerLogo} alt="Corner logo" className="h-7 w-7 object-contain" />
           </div>
           <div>
-            <span className="font-extrabold text-xl text-white tracking-tight block leading-none">
+            <span className="block text-xl font-extrabold leading-none tracking-tight text-white">
               Corner
             </span>
-            <span className="text-[10px] font-extrabold tracking-widest text-blue-400 uppercase mt-1 block">
+            <span className="mt-1 block text-[10px] font-extrabold uppercase tracking-[0.35em] text-blue-400">
               STUDY APP
             </span>
           </div>
